@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="./static/bootstrap-5.0.0-beta3-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./static/style.css">
+    <title>Hive Entropy</title>
+    <script type="text/x-template" id="grid-template">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th v-for="key in columns">
+                [[ key ]]
+                <span class="arrow">
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr class="node-info-line" v-for="entry in nodinfo" v-on:click="redirection('http://localhost:8080/nodes/'+entry.id)">
+              <td v-for="key in columns">
+                    [[ entry[key] ]]
+              </td>
+              
+              <input style="float:right" type="button" value="Deploy" onclick="document.location.href='http://127.0.0.1:5000/nodes/'+entry.id+'/deploy'">
+            </tr>
+          </tbody>
+        </table>
+    </script>
+  </head>
+  <header class="page-header">
+    <img class="img-rounded" height="120px" width="120px" src="../static/logo.png" >
+    <h1>Hive Entropy</h1>
+</header>
+  <body>
+    <script src="./static/bootstrap-5.0.0-beta3-dist/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <div class="container">
+    <div class="row">
+    <div class="col-sm-" id="nodes">
+        <table class="table table-striped">
+            <tr v-for="(key,item) in grid.gridData" v-bind:key="item.gridColumns">
+                <th>[[ item ]]</th>
+                <td>
+                    <template v-if="item==='processor'">
+                        <ul>
+                            <li v-for="(val,cat) in key">
+                                <template v-if="cat==='frequency'">[[ cat ]] : 
+                                    <ul>
+                                        <li v-for="(val2,cat2) in val">[[ cat2 ]] : [[ val2 ]]
+                                        </li>
+                                    </ul>
+                                </template>
+                                <template v-else>
+                                    [[ cat ]] : [[ val ]]
+                                </template>
+                            </li>
+                        </ul>
+                    </template>
+                    <template v-else-if="item==='ram'">
+                        <ul>
+                            <li v-for="(val,cat) in key">
+                                <template v-if="cat==='capacity'">[[ cat ]] : 
+                                    <ul>
+                                        <li v-for="(val2,cat2) in val">[[ cat2 ]] : [[ val2 ]]
+                                        </li>
+                                    </ul>
+                                </template>
+                                <template v-else>
+                                    [[ cat ]] : [[ val ]]
+                                </template>
+                            </li>
+                        </ul>
+                    </template>
+                    <template v-else>
+                        [[ key ]]
+                    </template>
+                </td>
+            </tr>
+        </table>
+    </div>
+   </div>
+   <script>
+    // register the grid component
+    var nodes = new Vue({
+        el: "#nodes",
+        delimiters: ['[[',']]'],
+        data () {
+            return {
+                gridColumns: null,
+                gridData: null,
+                grid: {},
+                nodesId: null
+            }
+        },
+        mounted () {
+            axios.get("http://sevenmoor.com:4444/nodes/1")
+                .then(response => {
+                    this.grid = {"gridData" : response.data.gridData, "gridColumns" : response.data.gridColumns}
+                    this.nodesId = response.data.nodesId
+                })
+                .catch(function (error) {
+                    console.log(error)
+                    this.errored = true
+                })
+        }
+    });
+</script>
+</body>
+</html>
+
+
